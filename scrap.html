@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+    <title>Scrap IC Lookup</title>
+
+    <!-- Google Fonts: Space Grotesk, Inter, JetBrains Mono -->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Material Symbols Outlined -->
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-surface: #121212;
+            --bg-card: #181818;
+            --border-color: #2a2c33;
+            --primary: #3e90ff;
+            --on-primary: #001e44;
+            --secondary: #43ffbb;
+            --text-main: #f1f1f1;
+            --text-muted: #9ca3af;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-surface);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 24px;
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 20px;
+            line-height: 1;
+            display: inline-block;
+            direction: ltr;
+        }
+
+        /* Top Header */
+        header {
+            width: 100%;
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            background-color: rgba(18, 18, 18, 0.95);
+            backdrop-filter: blur(8px);
+            z-index: 30;
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon-box {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: rgba(62, 144, 255, 0.1);
+            border: 1px solid rgba(62, 144, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+        }
+
+        .title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 1.125rem;
+            color: #ffffff;
+        }
+
+        .user-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #222222;
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        /* Main Viewport */
+        main {
+            width: 100%;
+            max-width: 440px;
+            margin: 0 auto;
+            padding: 24px 20px 0;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* Input Controls */
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            width: 100%;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            height: 56px;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0 80px 0 44px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            color: #ffffff;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--primary);
+        }
+
+        .action-icons {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 4px;
+        }
+
+        .icon-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .icon-btn:hover {
+            color: #ffffff;
+        }
+
+        .btn-primary {
+            width: 100%;
+            height: 48px;
+            background-color: var(--primary);
+            color: var(--on-primary);
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 600;
+            font-size: 0.938rem;
+            border: none;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 14px rgba(62, 144, 255, 0.2);
+            transition: transform 0.1s;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.99);
+        }
+
+        /* Results Display */
+        .results-section {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 2px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .match-header span:first-child {
+            color: var(--text-muted);
+        }
+
+        .match-header span:last-child {
+            color: var(--primary);
+        }
+
+        /* Result Cards */
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .type-badge {
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid rgba(67, 255, 187, 0.5);
+            background: rgba(67, 255, 187, 0.1);
+            color: var(--secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .type-badge.unlisted {
+            border-color: rgba(239, 68, 68, 0.5);
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+        }
+
+        .badge-label {
+            position: absolute;
+            top: 12px;
+            left: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-value {
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 2rem;
+        }
+
+        .component-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .meta-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .meta-title {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .meta-desc {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--primary);
+        }
+
+        .grid-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .detail-box {
+            background-color: var(--bg-surface);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-box span:last-child {
+            margin-top: 2px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .footer-credit {
+            text-align: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-top: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="header-brand">
+            <div class="icon-box">
+                <span class="material-symbols-outlined">memory</span>
+            </div>
+            <span class="title">Scrap IC Lookup</span>
+        </div>
+        <button class="user-btn" type="button" aria-label="User Profile">
+            <img src="images/profile.jpg" alt="Profile Picture"
+                style="width: 100%; height: 100%; object-fit: cover;">
+        </button>
+    </header>
+
+    <main>
+        <section class="input-group">
+            <div class="input-wrapper">
+                <span class="material-symbols-outlined search-icon">search</span>
+                <input id="icInput" type="text" placeholder="Enter IC code (e.g. KMQE, G7, SDIN)..." value="KMQE60013M">
+                <div class="action-icons">
+                    <button class="icon-btn" type="button" onclick="clearInput()" title="Clear">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                    <button class="icon-btn" type="button" onclick="resetLookup()" title="Reset Screen">
+                        <span class="material-symbols-outlined">refresh</span>
+                    </button>
+                </div>
+            </div>
+            <button id="lookupBtn" class="btn-primary" type="button">
+                <span>Lookup</span>
+                <span class="material-symbols-outlined">arrow_forward</span>
+            </button>
+        </section>
+
+        <section class="results-section">
+            <div class="match-header">
+                <span>Lookup Match</span>
+                <span id="matchTypeLabel">Exact Match</span>
+            </div>
+            <div id="resultsContainer"></div>
+        </section>
+
+        <div class="footer-credit">
+            <p>Created by Romeo Josh C. Requiron</p>
+        </div>
+    </main>
+
+    <script>
+        const database = {
+            "KMQE": ["A+", "Samsung eMMC/eMCP Flash Memory"],
+            "KMQ3": ["A+", "Samsung eMMC/eMCP Flash Memory"],
+            "KMQ8": ["A+", "Samsung eMMC/eMCP Flash Memory"],
+            "AMRE": ["A+", "Memory IC Package"],
+            "KMR8": ["A+", "Samsung eMMC Flash Memory"],
+            "KMFE": ["A+", "Samsung eMMC Flash Memory"],
+            "KMF8": ["A+", "Samsung eMMC Flash Memory"],
+            "KMI8X": ["A+", "Samsung eMMC Flash Memory"],
+            "KMGE": ["A+", "Samsung eMMC Flash Memory"],
+            "KMR3": ["A+", "Samsung eMMC Flash Memory"],
+            "KMK8X": ["A+", "Samsung eMMC Flash Memory"],
+            "KMK8U": ["A+", "Samsung eMMC Flash Memory"],
+            "TYDO 1662": ["A+", "Toshiba Flash IC"],
+            "TYDO 1632": ["A+", "Toshiba Flash IC"],
+            "TYDO 1657": ["A+", "Toshiba Flash IC"],
+            "TYDO 1659": ["A+", "Toshiba Flash IC"],
+            "TYDO 1623": ["A+", "Toshiba Flash IC"],
+            "TYEO 1657": ["A+", "Toshiba Flash IC"],
+            "TYEO 1659": ["A+", "Toshiba Flash IC"],
+            "JY 932": ["A+", "Micron Memory IC (FBGA Mark)"],
+            "JY 950": ["A+", "Micron Memory IC (FBGA Mark)"],
+            "JZ 008": ["A+", "Micron Memory IC (FBGA Mark)"],
+            "JZ 011": ["A+", "Micron Memory IC (FBGA Mark)"],
+            "H9TP 18": ["A+", "SK Hynix eMCP Storage"],
+            "H9TQ 17": ["A+", "SK Hynix eMCP Storage"],
+            "SDAD-16G": ["A+", "SanDisk NAND Flash Storage 16GB"],
+            "16EMCP08": ["A+", "eMCP Storage Chip 8GB"],
+            "16EMCP16": ["A+", "eMCP Storage Chip 16GB"],
+
+            "KMQ4": ["A2", "Samsung eMMC Flash Memory"],
+            "KMQX": ["A2", "Samsung eMMC Flash Memory"],
+            "KMQD": ["A2", "Samsung eMMC Flash Memory"],
+            "KMQ2": ["A2", "Samsung eMMC Flash Memory"],
+            "KMDX": ["A2", "Samsung eMMC Flash Memory"],
+            "KMWX": ["A2", "Samsung eMMC Flash Memory"],
+            "KMGX": ["A2", "Samsung eMMC Flash Memory"],
+            "KM4X": ["A2", "Samsung eMMC Flash Memory"],
+            "KMRX": ["A2", "Samsung eMMC Flash Memory"],
+            "KMRD": ["A2", "Samsung eMMC Flash Memory"],
+            "KMDD": ["A2", "Samsung eMMC Flash Memory"],
+            "KMGD": ["A2", "Samsung eMMC Flash Memory"],
+            "KMI4": ["A2", "Samsung eMMC Flash Memory"],
+            "KMR2": ["A2", "Samsung eMMC Flash Memory"],
+            "TYRO 1667": ["A2", "Toshiba Memory IC"],
+            "TYRO 1677": ["A2", "Toshiba Memory IC"],
+            "TYRO 1668": ["A2", "Toshiba Memory IC"],
+            "TYRO 1658": ["A2", "Toshiba Memory IC"],
+            "JZ 025": ["A2", "Micron Memory IC"],
+            "JZ 002": ["A2", "Micron Memory IC"],
+            "JZ 007": ["A2", "Micron Memory IC"],
+            "JZ 012": ["A2", "Micron Memory IC"],
+            "JZ 014": ["A2", "Micron Memory IC"],
+            "JZ 004": ["A2", "Micron Memory IC"],
+            "JZ 050": ["A2", "Micron Memory IC"],
+            "JZ 013": ["A2", "Micron Memory IC"],
+            "JZ 083": ["A2", "Micron Memory IC"],
+            "H9TQ 26": ["A2", "SK Hynix eMCP Storage"],
+            "H9TQ 27": ["A2", "SK Hynix eMCP Storage"],
+            "H9AG8": ["A2", "SK Hynix eMCP Storage"],
+            "SDAD32G": ["A2", "SanDisk NAND Flash Storage 32GB"],
+
+            "KMDP": ["A3", "Samsung eMMC Flash Memory"],
+            "KMGP": ["A3", "Samsung eMMC Flash Memory"],
+            "KMRP": ["A3", "Samsung eMMC Flash Memory"],
+            "KM3P": ["A3", "Samsung eMMC Flash Memory"],
+            "KMRC": ["A3", "Samsung eMMC Flash Memory"],
+            "KM5C": ["A3", "Samsung eMMC Flash Memory"],
+            "KMDC": ["A3", "Samsung eMMC Flash Memory"],
+            "KMWC": ["A3", "Samsung eMMC Flash Memory"],
+            "KMRH": ["A3", "Samsung eMMC Flash Memory"],
+            "KM5H": ["A3", "Samsung eMMC Flash Memory"],
+            "KM2H": ["A3", "Samsung eMMC Flash Memory"],
+            "KM3H": ["A3", "Samsung eMMC Flash Memory"],
+            "KMDH": ["A3", "Samsung eMMC Flash Memory"],
+            "KM5P": ["A3", "Samsung eMMC Flash Memory"],
+            "JZ 090": ["A3", "Micron Memory IC"],
+            "JZ 187": ["A3", "Micron Memory IC"],
+            "JZ 150": ["A3", "Micron Memory IC"],
+            "JZ B409": ["A3", "Micron Memory IC"],
+            "JZ 053": ["A3", "Micron Memory IC"],
+            "JZ 128": ["A3", "Micron Memory IC"],
+            "JZ 109": ["A3", "Micron Memory IC"],
+            "JZ 049": ["A3", "Micron Memory IC"],
+            "JZ 168": ["A3", "Micron Memory IC"],
+            "JZ 177": ["A3", "Micron Memory IC"],
+            "JZ 083": ["A3", "Micron Memory IC"],
+            "JZ 052": ["A3", "Micron Memory IC"],
+            "JZ 266": ["A3", "Micron Memory IC"],
+            "JZ 185": ["A3", "Micron Memory IC"],
+            "JZ 478": ["A3", "Micron Memory IC"],
+            "JZ 481": ["A3", "Micron Memory IC"],
+            "JZ 479": ["A3", "Micron Memory IC"],
+            "SDAD64G": ["A3", "SanDisk NAND Flash Storage 64GB"],
+            "H9AG9": ["A3", "SK Hynix eMCP Storage"],
+            "H9TQ 52": ["A3", "SK Hynix eMCP Storage"],
+            "H9TQ 53": ["A3", "SK Hynix eMCP Storage"],
+            "H9TQ 54": ["A3", "SK Hynix eMCP Storage"],
+            "H9HP 63": ["A3", "SK Hynix eMCP Storage"],
+            "H9HP 26": ["A3", "SK Hynix eMCP Storage"],
+
+            "KMDV": ["A4", "Samsung eMMC Flash Memory"],
+            "KM5V": ["A4", "Samsung eMMC Flash Memory"],
+            "KRV": ["A4", "Samsung Memory IC"],
+            "KMWV": ["A4", "Samsung eMMC Flash Memory"],
+            "KM3V": ["A4", "Samsung eMMC Flash Memory"],
+            "KM8V": ["A4", "Samsung eMMC Flash Memory"],
+            "KMRV": ["A4", "Samsung eMMC Flash Memory"],
+            "KM2L": ["A4", "Samsung eMMC Flash Memory"],
+            "KM8L": ["A4", "Samsung eMMC Flash Memory"],
+            "KM5L": ["A4", "Samsung eMMC Flash Memory"],
+            "KM2B": ["A4", "Samsung eMMC Flash Memory"],
+            "KM8B": ["A4", "Samsung eMMC Flash Memory"],
+            "KM8F": ["A4", "Samsung eMMC Flash Memory"],
+            "JZ 103": ["A4", "Micron Memory IC"],
+            "JZ 386": ["A4", "Micron Memory IC"],
+            "JZ 064": ["A4", "Micron Memory IC"],
+            "JZ 100": ["A4", "Micron Memory IC"],
+            "JZ 151": ["A4", "Micron Memory IC"],
+            "JZ 171": ["A4", "Micron Memory IC"],
+            "H9HP16": ["A4", "SK Hynix eMCP Storage"],
+            "H9HQ 15": ["A4", "SK Hynix eMCP Storage"],
+            "SDAD 128G": ["A4", "SanDisk NAND Flash Storage 128GB"],
+            "KMAS9001PM": ["A4", "Samsung High-Capacity Memory IC"],
+
+            "H9HQ21": ["A5", "SK Hynix Memory IC"],
+            "H9HQ22": ["A5", "SK Hynix Memory IC"],
+            "KM8F8001JM": ["A5", "Samsung Memory Module"],
+            "KM2B8001JM": ["A5", "Samsung Memory Module"],
+            "KM8B8001JM": ["A5", "Samsung Memory Module"],
+
+            "G8": ["NON 32", "Non-Code Category 32 IC"],
+            "C6": ["NON 32", "Non-Code Category 32 IC"],
+            "U6": ["NON 32", "Non-Code Category 32 IC"],
+            "M6": ["NON 32", "Non-Code Category 32 IC"],
+            "S6": ["NON 32", "Non-Code Category 32 IC"],
+            "KLMBG": ["NON 32", "Samsung eMMC Legacy Flash"],
+            "KLUBG": ["NON 32", "Samsung UFS Flash Memory"],
+            "SDIN 32G": ["NON 32", "SanDisk iNAND 32GB Storage"],
+
+            "16G": ["NON 16", "16GB Legacy Memory IC"],
+            "G7": ["NON 16", "Non-Code Category 16 IC"],
+            "G6": ["NON 16", "Non-Code Category 16 IC"],
+            "M5": ["NON 16", "Non-Code Category 16 IC"],
+            "M4": ["NON 16", "Non-Code Category 16 IC"],
+            "KLMAG": ["NON 16", "Samsung eMMC Flash"],
+            "KLM8G": ["NON 16", "Samsung eMMC Flash 8GB"],
+            "SAM MIX": ["NON 16", "Samsung Mixed Scrap IC"],
+            "SDIN 16G": ["NON 16", "SanDisk iNAND 16GB Storage"],
+            "SDIN 8G": ["NON 16", "SanDisk iNAND 8GB Storage"],
+
+            "CG": ["NON 64", "Non-Code Category 64 IC"],
+            "G9": ["NON 64", "Non-Code Category 64 IC"],
+            "C7": ["NON 64", "Non-Code Category 64 IC"],
+            "U7": ["NON 64", "Non-Code Category 64 IC"],
+            "S7": ["NON 64", "Non-Code Category 64 IC"],
+            "M78": ["NON 64", "Non-Code Category 64 IC"],
+            "M76": ["NON 64", "Non-Code Category 64 IC"],
+            "M74": ["NON 64", "Non-Code Category 64 IC"],
+            "KLUCG": ["NON 64", "Samsung UFS Storage 64GB Grade"],
+            "JZ 495": ["NON 64", "Micron Memory IC"],
+            "JZ 496": ["NON 64", "Micron Memory IC"],
+            "3C 64G": ["NON 64", "3C 64GB Storage Module"],
+            "KLMCG": ["NON 64", "Samsung eMMC Flash 64GB Grade"],
+
+            "DG": ["NON 128", "Non-Code Category 128 IC"],
+            "S8": ["NON 128", "Non-Code Category 128 IC"],
+            "TOC8": ["NON 128", "Toshiba Memory IC"],
+            "F8TO": ["NON 128", "Toshiba NAND Flash"],
+            "F4TON8": ["NON 128", "Toshiba Memory IC"],
+            "JZ 144": ["NON 128", "Micron Memory IC"],
+            "JZ 380": ["NON 128", "Micron Memory IC"],
+            "JZ 341": ["NON 128", "Micron Memory IC"],
+            "H26T8700": ["NON 128", "SK Hynix NAND Flash"],
+            "KLUDG": ["NON 128", "Samsung UFS Storage"],
+            "3C JZ 151": ["NON 128", "Micron Custom Module"],
+            "3C JZ 159": ["NON 128", "Micron Custom Module"],
+            "3C JZ 160": ["NON 128", "Micron Custom Module"],
+
+            "C9": ["NON 256", "Non-Code Category 256 IC"],
+            "T1": ["NON 256", "Non-Code Category 256 IC"],
+            "KLUE": ["NON 256", "Samsung UFS Storage"],
+            "KLMEG": ["NON 256", "Samsung eMMC Storage"],
+
+            "KLUF": ["NON 512", "Samsung UFS High-Capacity Storage"],
+            "T2": ["NON 512", "Non-Code Category 512 IC"],
+
+            "JY974": ["Class B", "Micron Memory IC"],
+            "JY 941": ["Class B", "Micron Memory IC"],
+            "JAWA60": ["Class B", "Memory Controller/IC"],
+            "JY938": ["Class B", "Micron Memory IC"],
+            "JWB11": ["Class B", "Memory Controller IC"],
+            "TYDO 1661": ["Class B", "Toshiba Flash Memory"],
+            "TYDO 1664": ["Class B", "Toshiba Flash Memory"],
+            "TYDO 1640": ["Class B", "Toshiba Flash Memory"],
+            "H9TQ 64": ["Class B", "SK Hynix Storage"],
+            "H9TP 65": ["Class B", "SK Hynix Storage"],
+            "08EMCP08": ["Class B", "eMCP Storage Chip"],
+            "SD9D 8G": ["Class B", "SanDisk Storage 8GB"],
+            "KMK7": ["Class B", "Samsung Memory IC"],
+            "KMR7X": ["Class B", "Samsung Memory IC"],
+            "KMFN": ["Class B", "Samsung Memory IC"],
+            "KMRN": ["Class B", "Samsung Memory IC"],
+            "KMF7": ["Class B", "Samsung Memory IC"],
+            "KMKU": ["Class B", "Samsung Memory IC"],
+            "KQN": ["Class B", "Memory Controller IC"],
+            "KQ7": ["Class B", "Memory Controller IC"],
+            "17ABL BIG CHIP": ["Class B", "Large Surface-Area Board IC"],
+            "26ABL BIG CHIP": ["Class B", "Large Surface-Area Board IC"]
+        };
+
+        function clearInput() {
+            const input = document.getElementById('icInput');
+            input.value = '';
+            input.focus();
+        }
+
+        function resetLookup() {
+            document.getElementById('icInput').value = '';
+            document.getElementById('matchTypeLabel').textContent = 'Ready';
+
+            document.getElementById('resultsContainer').innerHTML = `
+        <article class="card">
+            <div class="type-badge" style="border-color: rgba(255, 255, 255, 0.1); background: rgba(255, 255, 255, 0.05); color: var(--text-muted);">
+                <span class="badge-label">Type:</span>
+                <span class="badge-value">--</span>
+            </div>
+
+            <div class="component-meta">
+                <span class="meta-label">Component Identifier</span>
+                <h2 class="meta-title" style="color: var(--text-muted);">--</h2>
+                <p class="meta-desc" style="color: var(--text-muted);">Awaiting input...</p>
+            </div>
+
+            <div class="grid-details">
+                <div class="detail-box">
+                    <span class="meta-label">Classification</span>
+                    <span style="color: var(--text-muted)">--</span>
+                </div>
+                <div class="detail-box">
+                    <span class="meta-label">Scrap Price</span>
+                    <span style="color: var(--text-muted)">--</span>
+                </div>
+            </div>
+        </article>`;
+
+            document.getElementById('icInput').focus();
+        }
+
+        function performLookup() {
+            const inputVal = document.getElementById('icInput').value.trim();
+            const resultsContainer = document.getElementById('resultsContainer');
+            const matchTypeLabel = document.getElementById('matchTypeLabel');
+
+            // If empty input is searched, just trigger the reset empty state
+            if (!inputVal) {
+                resetLookup();
+                return;
+            }
+
+            const cleanedQuery = inputVal.toUpperCase();
+            let gradeVal = "Unlisted";
+            let description = "Code not found in reference chart";
+            let matchType = "Exact Match";
+
+            if (database[cleanedQuery]) {
+                gradeVal = database[cleanedQuery][0];
+                description = database[cleanedQuery][1];
+                matchType = "Exact Match";
+            } else {
+                let foundPartial = false;
+                for (const [key, val] of Object.entries(database)) {
+                    if (cleanedQuery.includes(key) || key.includes(cleanedQuery)) {
+                        gradeVal = val[0];
+                        description = val[1];
+                        matchType = "Partial Match";
+                        foundPartial = true;
+                        break;
+                    }
+                }
+                if (!foundPartial) {
+                    matchType = "Unlisted";
+                    gradeVal = "N/A";
+                    description = "Unlisted Scrap IC Part Number";
+                }
+            }
+
+            matchTypeLabel.textContent = matchType;
+            const isUnlisted = matchType === "Unlisted";
+
+            resultsContainer.innerHTML = `
+        <article class="card">
+            <div class="type-badge ${isUnlisted ? 'unlisted' : ''}">
+                <span class="badge-label">Type:</span>
+                <span class="badge-value">${gradeVal}</span>
+            </div>
+
+            <div class="component-meta">
+                <span class="meta-label">Component Identifier</span>
+                <h2 class="meta-title">${inputVal}</h2>
+                <p class="meta-desc">${description}</p>
+            </div>
+
+            <div class="grid-details">
+                <div class="detail-box">
+                    <span class="meta-label">Classification</span>
+                    <span style="color: #ffffff">${isUnlisted ? 'Unlisted' : 'High Au Wire'}</span>
+                </div>
+                <div class="detail-box">
+                    <span class="meta-label">Scrap Price</span>
+                    <span style="color: ${isUnlisted ? '#ef4444' : 'var(--secondary)'}">${isUnlisted ? '₱0.00 / unit' : '₱795.00 / unit'}</span>
+                </div>
+            </div>
+        </article>`;
+        }
+
+        document.getElementById('lookupBtn').addEventListener('click', performLookup);
+        document.getElementById('icInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') performLookup();
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+                document.getElementById('icInput').value = '';
+                resetLookup();
+            });
+    </script>
+
+</body>
+
+</html>
